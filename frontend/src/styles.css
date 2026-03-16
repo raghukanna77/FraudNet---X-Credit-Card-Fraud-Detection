@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+
+:root {
+  --bg-ink: #0f1414;
+  --bg-soft: #f6f8f7;
+  --brand-teal: #136f63;
+  --brand-orange: #ff7f11;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+  color: var(--bg-ink);
+  background:
+    radial-gradient(1200px 480px at 14% -10%, rgba(19, 111, 99, 0.2), transparent 62%),
+    radial-gradient(1100px 500px at 104% 8%, rgba(255, 127, 17, 0.16), transparent 62%),
+    var(--bg-soft);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.app-shell {
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-orb {
+  position: fixed;
+  width: 340px;
+  height: 340px;
+  border-radius: 999px;
+  filter: blur(44px);
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-orb-a {
+  background: #34d399;
+  top: -120px;
+  left: -120px;
+  animation: floatA 16s ease-in-out infinite;
+}
+
+.bg-orb-b {
+  background: #ffb169;
+  right: -120px;
+  bottom: -120px;
+  animation: floatB 18s ease-in-out infinite;
+}
+
+@keyframes floatA {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(40px, 48px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes floatB {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(-36px, -42px); }
+  100% { transform: translate(0, 0); }
+}
+
+@media (max-width: 900px) {
+  .bg-orb {
+    width: 250px;
+    height: 250px;
+    opacity: 0.22;
+  }
+}
