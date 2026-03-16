@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudNet-X | Fraud Detection System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .status-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .status-item {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .status-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .status-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .badge-healthy {
+            background: #10b981;
+            color: white;
+        }
+
+        .badge-degraded {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-card {
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .risk-score {
+            text-align: center;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .risk-low {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .risk-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .risk-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .risk-critical {
+            background: #fecaca;
+            color: #7f1d1d;
+        }
+
+        .risk-score-value {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .risk-level {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .detail-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .explanation {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .explanation h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .feature-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .feature-bar {
+            flex: 1;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+
+        .feature-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.5s ease-out;
+        }
+
+        .feature-value {
+            font-weight: bold;
+            color: #667eea;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .quick-test {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eff6ff;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .quick-test h4 {
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+
+        .quick-test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-test-btn {
+            padding: 8px 15px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s;
+        }
+
+        .quick-test-btn:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🛡️ FraudNet-X</h1>
+            <p>Adaptive Real-Time Cost-Sensitive Explainable Fraud Detection System</p>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-label">API Status</div>
+                <div class="status-value">
+                    <span id="apiStatus" class="status-badge badge-degraded">Checking...</span>
+                </div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Models Loaded</div>
+                <div class="status-value" id="modelsLoaded">-</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Total Predictions</div>
+                <div class="status-value" id="totalPredictions">0</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Avg Response Time</div>
+                <div class="status-value" id="avgLatency">- ms</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Input Form -->
+            <div class="card">
+                <h2>Transaction Input</h2>
+                
+                <form id="predictionForm">
+                    <div class="form-group">
+                        <label for="amount">Transaction Amount ($)</label>
+                        <input type="number" id="amount" step="0.01" placeholder="149.62" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="time">Time (seconds since first transaction)</label>
+                        <input type="number" id="time" step="0.01" placeholder="12345.0" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="v1">V1 (PCA Feature)</label>
+                            <input type="number" id="v1" step="any" placeholder="-1.36" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="v2">V2</label>
+                            <input type="number" id="v2" step="any" placeholder="-0.07" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="v3">V3</label>
+                            <input type="number" id="v3" step="any" placeholder="2.54" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="v4">V4</label>
+                            <input type="number" id="v4" step="any" placeholder="1.38" required>
+                        </div>
+                    </div>
+
+                    <div id="moreFields" style="display:none;">
+                        <!-- V5-V28 will be shown here -->
+                        <div class="form-row">
+                            <div class="form-group"><label>V5</label><input type="number" id="v5" step="any" value="-0.34"></div>
+                            <div class="form-group"><label>V6</label><input type="number" id="v6" step="any" value="0.46"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>V7</label><input type="number" id="v7" step="any" value="0.24"></div>
+                            <div class="form-group"><label>V8</label><input type="number" id="v8" step="any" value="0.10"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>V9</label><input type="number" id="v9" step="any" value="0.36"></div>
+                            <div class="form-group"><label>V10</label><input type="number" id="v10" step="any" value="0.09"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>V11</label><input type="number" id="v11" step="any" value="-0.55"></div>
+                            <div class="form-group"><label>V12</label><input type="number" id="v12" step="any" value="-0.62"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>V13</label><input type="number" id="v13" step="any" value="-0.99"></div>
+                            <div class="form-group"><label>V14</label><input type="number" id="v14" step="any" value="-0.31"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>V15</label><input type="number" id="v15" step="any" value="1.47"></div>
+                            <div class="form-group"><label>V16</label><input type="number" id="v16" step="any" value="-0.47"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>V17</label><input type="number" id="v17" step="any" value="0.21"></div>
+                            <div class="form-group"><label>V18</label><input type="number" id="v18" step="any" value="0.03"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>V19</label><input type="number" id="v19" step="any" value="0.40"></div>
+                            <div class="form-group"><label>V20</label><input type="number" id="v20" step="any" value="0.25"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>V21</label><input type="number" id="v21" step="any" value="-0.02"></div>
+                            <div class="form-group"><label>V22</label><input type="number" id="v22" step="any" value="0.28"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>V23</label><input type="number" id="v23" step="any" value="-0.11"></div>
+                            <div class="form-group"><label>V24</label><input type="number" id="v24" step="any" value="0.07"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>V25</label><input type="number" id="v25" step="any" value="0.13"></div>
+                            <div class="form-group"><label>V26</label><input type="number" id="v26" step="any" value="-0.19"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>V27</label><input type="number" id="v27" step="any" value="0.13"></div>
+                            <div class="form-group"><label>V28</label><input type="number" id="v28" step="any" value="-0.02"></div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="quick-test-btn" style="width:100%; margin:15px 0;" onclick="toggleMoreFields()">
+                        <span id="toggleText">Show All V Features (V5-V28)</span>
+                    </button>
+
+                    <button type="submit" class="btn" id="predictBtn">
+                        🔍 Analyze Transaction
+                    </button>
+                </form>
+
+                <div class="quick-test">
+                    <h4>Quick Test Samples</h4>
+                    <div class="quick-test-buttons">
+                        <button class="quick-test-btn" onclick="loadSampleTransaction('low')">Low Risk 🟢</button>
+                        <button class="quick-test-btn" onclick="loadSampleTransaction('medium')">Medium Risk 🟡</button>
+                        <button class="quick-test-btn" onclick="loadSampleTransaction('high')">High Risk 🔴</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="card result-card" id="resultCard">
+                <h2>Prediction Results</h2>
+                
+                <div id="loadingDiv" class="loading" style="display:none;">
+                    <div class="spinner"></div>
+                    <p>Analyzing transaction...</p>
+                </div>
+
+                <div id="errorDiv" style="display:none;"></div>
+
+                <div id="resultContent" style="display:none;">
+                    <div class="risk-score" id="riskScoreCard">
+                        <div class="risk-level" id="riskLevel">-</div>
+                        <div class="risk-score-value" id="riskScore">-</div>
+                        <div>Risk Score / 100</div>
+                    </div>
+
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Transaction ID</div>
+                            <div class="detail-value" id="transactionId">-</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Fraud Probability</div>
+                            <div class="detail-value" id="fraudProb">-</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Confidence</div>
+                            <div class="detail-value" id="confidence">-</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Response Time</div>
+                            <div class="detail-value" id="latency">-</div>
+                        </div>
+                    </div>
+
+                    <div class="explanation">
+                        <h3>📊 Feature Importance</h3>
+                        <div id="featureExplanation"></div>
+                    </div>
+
+                    <div class="explanation">
+                        <h3>💡 Recommendation</h3>
+                        <p id="recommendation">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let predictionCount = 0;
+
+        // Toggle more fields
+        function toggleMoreFields() {
+            const moreFields = document.getElementById('moreFields');
+            const toggleText = document.getElementById('toggleText');
+            if (moreFields.style.display === 'none') {
+                moreFields.style.display = 'block';
+                toggleText.textContent = 'Hide Additional Features';
+            } else {
+                moreFields.style.display = 'none';
+                toggleText.textContent = 'Show All V Features (V5-V28)';
+            }
+        }
+
+        // Load sample transactions
+        function loadSampleTransaction(type) {
+            const samples = {
+                low: {
+                    Time: 1000, Amount: 15.50,
+                    V1: 0.1, V2: 0.2, V3: 0.1, V4: 0.2, V5: 0.1, V6: 0.1, V7: 0.1, V8: 0.1,
+                    V9: 0.1, V10: 0.1, V11: 0.1, V12: 0.1, V13: 0.1, V14: 0.1, V15: 0.1, V16: 0.1,
+                    V17: 0.1, V18: 0.1, V19: 0.1, V20: 0.1, V21: 0.1, V22: 0.1, V23: 0.1, V24: 0.1,
+                    V25: 0.1, V26: 0.1, V27: 0.1, V28: 0.1
+                },
+                medium: {
+                    Time: 5000, Amount: 250.00,
+                    V1: -1.2, V2: 0.8, V3: 1.5, V4: -0.9, V5: 0.6, V6: -0.7, V7: 0.5, V8: -0.4,
+                    V9: 0.9, V10: -0.8, V11: 0.7, V12: -0.6, V13: 0.5, V14: -1.1, V15: 0.9, V16: -0.8,
+                    V17: 0.7, V18: -0.6, V19: 0.8, V20: -0.5, V21: 0.4, V22: -0.7, V23: 0.6, V24: -0.5,
+                    V25: 0.4, V26: -0.6, V27: 0.5, V28: -0.4
+                },
+                high: {
+                    Time: 12345, Amount: 850.00,
+                    V1: -3.5, V2: 2.8, V3: -2.9, V4: 3.1, V5: -2.7, V6: 2.6, V7: -2.5, V8: 2.4,
+                    V9: -2.8, V10: 2.9, V11: -3.0, V12: 2.7, V13: -2.6, V14: 3.2, V15: -2.9, V16: 2.8,
+                    V17: -2.7, V18: 2.5, V19: -2.9, V20: 2.8, V21: -2.6, V22: 2.7, V23: -2.5, V24: 2.4,
+                    V25: -2.8, V26: 2.6, V27: -2.7, V28: 2.5
+                }
+            };
+
+            const sample = samples[type];
+            document.getElementById('time').value = sample.Time;
+            document.getElementById('amount').value = sample.Amount;
+            
+            for (let i = 1; i <= 28; i++) {
+                const input = document.getElementById(`v${i}`);
+                if (input) input.value = sample[`V${i}`];
+            }
+
+            // Show all fields
+            document.getElementById('moreFields').style.display = 'block';
+            document.getElementById('toggleText').textContent = 'Hide Additional Features';
+
+            // Auto-submit
+            setTimeout(() => document.getElementById('predictionForm').dispatchEvent(new Event('submit')), 100);
+        }
+
+        // Check API health
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                
+                const statusBadge = document.getElementById('apiStatus');
+                statusBadge.textContent = data.status.toUpperCase();
+                statusBadge.className = `status-badge badge-${data.status}`;
+                
+                const modelsLoaded = Object.values(data.models_loaded).filter(Boolean).length;
+                document.getElementById('modelsLoaded').textContent = `${modelsLoaded}/4`;
+                
+                return true;
+            } catch (error) {
+                document.getElementById('apiStatus').textContent = 'OFFLINE';
+                document.getElementById('apiStatus').className = 'status-badge badge-degraded';
+                return false;
+            }
+        }
+
+        // Get metrics
+        async function getMetrics() {
+            try {
+                const response = await fetch(`${API_URL}/metrics`);
+                const data = await response.json();
+                
+                document.getElementById('totalPredictions').textContent = data.total_requests || predictionCount;
+                document.getElementById('avgLatency').textContent = 
+                    data.average_latency_ms ? `${data.average_latency_ms.toFixed(1)} ms` : '- ms';
+            } catch (error) {
+                console.error('Failed to fetch metrics:', error);
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Show loading
+            document.getElementById('resultCard').classList.add('show');
+            document.getElementById('loadingDiv').style.display = 'block';
+            document.getElementById('resultContent').style.display = 'none';
+            document.getElementById('errorDiv').style.display = 'none';
+            
+            // Collect form data
+            const formData = {
+                Time: parseFloat(document.getElementById('time').value),
+                Amount: parseFloat(document.getElementById('amount').value)
+            };
+            
+            // Add V features
+            for (let i = 1; i <= 28; i++) {
+                const value = document.getElementById(`v${i}`)?.value;
+                formData[`V${i}`] = value ? parseFloat(value) : 0;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                displayResults(result);
+                predictionCount++;
+                
+                // Update metrics
+                await getMetrics();
+                
+            } catch (error) {
+                console.error('Prediction error:', error);
+                document.getElementById('loadingDiv').style.display = 'none';
+                document.getElementById('errorDiv').style.display = 'block';
+                document.getElementById('errorDiv').className = 'error';
+                document.getElementById('errorDiv').textContent = 
+                    `Error: ${error.message}. Make sure the API server is running on ${API_URL}`;
+            }
+        });
+
+        // Display results
+        function displayResults(result) {
+            document.getElementById('loadingDiv').style.display = 'none';
+            document.getElementById('resultContent').style.display = 'block';
+            
+            // Risk score
+            const riskScore = Math.round(result.risk_score);
+            const riskLevel = result.risk_level;
+            
+            document.getElementById('riskScore').textContent = riskScore;
+            document.getElementById('riskLevel').textContent = riskLevel;
+            
+            const riskCard = document.getElementById('riskScoreCard');
+            riskCard.className = 'risk-score risk-' + riskLevel.toLowerCase();
+            
+            // Details
+            document.getElementById('transactionId').textContent = result.transaction_id;
+            document.getElementById('fraudProb').textContent = `${(result.fraud_probability * 100).toFixed(1)}%`;
+            document.getElementById('confidence').textContent = `${(result.confidence * 100).toFixed(1)}%`;
+            document.getElementById('latency').textContent = `${result.latency_ms.toFixed(1)} ms`;
+            
+            // Feature explanation
+            if (result.explanation && result.explanation.top_features) {
+                const featuresHtml = result.explanation.top_features
+                    .map(f => {
+                        const importance = Math.min(f.importance * 100, 100);
+                        return `
+                            <div class="feature-item">
+                                <span class="feature-name">${f.feature}</span>
+                                <div class="feature-bar">
+                                    <div class="feature-bar-fill" style="width: ${importance}%"></div>
+                                </div>
+                                <span class="feature-value">${importance.toFixed(1)}%</span>
+                            </div>
+                        `;
+                    })
+                    .join('');
+                document.getElementById('featureExplanation').innerHTML = featuresHtml;
+                
+                if (result.explanation.note) {
+                    document.getElementById('featureExplanation').innerHTML += 
+                        `<p style="margin-top: 10px; color: #666; font-size: 0.9em;">ℹ️ ${result.explanation.note}</p>`;
+                }
+            }
+            
+            // Recommendation
+            if (result.recommendation) {
+                const rec = result.recommendation;
+                document.getElementById('recommendation').innerHTML = `
+                    <strong>Action:</strong> ${rec.action || 'Review'}<br>
+                    <strong>Reason:</strong> ${rec.reason || 'Fraud detection analysis complete'}
+                `;
+            }
+        }
+
+        // Initialize
+        checkHealth();
+        getMetrics();
+        
+        // Refresh health status periodically
+        setInterval(checkHealth, 30000); // Every 30 seconds
+        setInterval(getMetrics, 10000);  // Every 10 seconds
+    </script>
+</body>
+</html>
