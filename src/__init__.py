@@ -1,0 +1,6 @@
+"""
+FraudNet-X: Adaptive Real-Time Cost-Sensitive Explainable Graph-Temporal Hybrid Fraud Detection System
+"""
+
+__version__ = "1.0.0"
+__author__ = "FraudNet-X Team"
