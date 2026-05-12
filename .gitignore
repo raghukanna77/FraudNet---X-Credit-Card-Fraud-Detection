@@ -48,6 +48,45 @@ logs/*.log
 *.swp
 *.swo
 *~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+.env.production.local
+config.local.py
+
+# Deployment
+.renderignore
+.vercelignore
+vercel.json
+render.yaml
+build.sh
+
+# Node/Frontend
+node_modules/
+pm-debug.log
+yarn-error.log
+frontend/dist/
+frontend/build/
+
+# OS
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Documentation
+docs/_build/
+site/
 
 # OS
 .DS_Store
